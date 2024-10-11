@@ -1,0 +1,69 @@
+from collections import deque
+print("hello justine")
+# Client class to hold client information
+class Client:
+    def __init__(self, client_id, name, contact_info):
+        self.client_id = client_id
+        self.name = name
+        self.contact_info = contact_info
+
+# ServiceBooking class to manage bookings
+class ServiceBooking:
+    def __init__(self, client, service_type):
+        self.client = client
+        self.service_type = service_type
+
+# GardeningService class to manage the platform
+class GardeningService:
+    def __init__(self):
+        self.clients = []  # List to manage clients
+        self.bookings_stack = []  # Stack for undoing bookings
+        self.tasks_queue = deque()  # Queue for scheduling tasks
+
+    def add_client(self, client_id, name, contact_info):
+        client = Client(client_id, name, contact_info)
+        self.clients.append(client)
+        print(f"Client {name} added.")
+
+    def book_service(self, client_id, service_type):
+        client = next((c for c in self.clients if c.client_id == client_id), None)
+        if client:
+            booking = ServiceBooking(client, service_type)
+            self.bookings_stack.append(booking)  # Push booking to stack
+            self.tasks_queue.append(booking)  # Add to tasks queue
+            print(f"Service booked for {client.name}.")
+        else:
+            print("Client not found.")
+
+    def undo_booking(self):
+        if self.bookings_stack:
+            last_booking = self.bookings_stack.pop()  # Pop the last booking
+            self.tasks_queue.remove(last_booking)  # Remove from tasks queue
+            print(f"Booking for {last_booking.client.name} undone.")
+        else:
+            print("No bookings to undo.")
+
+    def list_clients(self):
+        print("Clients:")
+        for client in self.clients:
+            print(f"{client.client_id}: {client.name} - {client.contact_info}")
+
+    def process_tasks(self):
+        while self.tasks_queue:
+            current_task = self.tasks_queue.popleft()  # Process next task
+            print(f"Processing service for {current_task.client.name} ({current_task.service_type}).")
+            # Here you would implement the service logic
+            # For simplicity, we'll just print a message
+
+# Example usage
+if __name__ == "__main__":
+    service = GardeningService()
+    service.add_client(1, "Alice", "alice@example.com")
+    service.add_client(2, "Bob", "bob@example.com")
+
+    service.book_service(1, "Lawn Mowing")
+    service.book_service(2, "Tree Trimming")
+
+    service.undo_booking()  # Undo Bob's booking
+    service.process_tasks()  # Process remaining tasks
+    service.list_clients()  # List all clients
